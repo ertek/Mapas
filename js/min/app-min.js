@@ -1,0 +1,2 @@
+requirejs.config({waitSeconds:120,baseUrl:"js/lib",paths:{app:"../app",async:"async",jquery:"//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min","jquery-cookie":"//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min",underscore:"//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min",backbone:"//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min",geoPosition:"../lib/geoPosition"}}),requirejs(["app/map"]);
+//# sourceMappingURL=./app-min.js.map

@@ -36,7 +36,12 @@ require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "as
         center: new google.maps.LatLng @center.lat, @center.lng
       # Se crea el mapa y se agrega al dic creado anteriormente
       @map = new google.maps.Map document.getElementById(@map_id), map_options
-      # @TODO: Crear método para manejo de Pins
+
+    setCenterMarker: (map, position)->
+    # TODO: Crear método para manejo de pin de tu ubicación
+
+    fetchMarkers: (map, url)->
+    # TODO: Método para obtener los marcadores de algún servicio
 
 
     # Obtiene ubicación mediante la biblioteca geoposition.js y la guarda en cookies y en la instancia de la aplicación
@@ -57,6 +62,7 @@ require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "as
 
     # Guarda la ubicación en las cookies
     storePosition: (position)->
+      # TODO: Guardar la info de forma segura
       $.cookie 'lat', position.coords.latitude
       $.cookie 'lng', position.coords.longitude
       @center = @storedPosition()

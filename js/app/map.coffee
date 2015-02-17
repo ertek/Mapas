@@ -38,6 +38,7 @@ require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "as
       @map = new google.maps.Map document.getElementById(@map_id), map_options
 
     setCenterMarker: (map, position)->
+    # Patch testing
     # TODO: Crear método para manejo de pin de tu ubicación
 
     fetchMarkers: (map, url)->

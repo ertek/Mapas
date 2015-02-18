@@ -1,5 +1,20 @@
 # Creado por Jorge Cedi Voirol el 13 de Febrero del 2015
 require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "async!http://maps.google.com/maps/api/js?sensor=false'"],  (MapModule) ->
+
+  class MarkerModel extends  Backbone.Model
+    initialize: ->
+      return
+
+  class MarkerList extends Backbone.Collection
+    model: MarkerModel
+    initialize: (opts)->
+      if opts
+        if opts.url
+          @url = opts.url
+    comparator: (marker)->
+      marker.get 'id'
+
+
   class MapView extends Backbone.View
     # Inician opciones de la aplicación
     el: $ '#map'
@@ -10,6 +25,7 @@ require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "as
     height: '100%'
     markers: []
     centerMarker: null
+    bounds: null
 
     # Método de inicialización, agrega opciones a la aplicación
     initialize: (opts)->
@@ -18,16 +34,18 @@ require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "as
           @width = opts.width
         if opts.height
           @height = opts.height
+      else
+        opts = {}
 
       if @storedPosition()
         @center = @storedPosition()
       else
         @getBrowserGeolocation()
       if $(@el).length
-        @render()
+        @render(opts)
 
     # Renderiza html y mapa
-    render: ->
+    render: (opts)->
       # Creamos div para el mapa
       $(@el).append "<div id='#{@map_id}' style='width: #{@width}; height: #{@height};'></div>"
       # Opciones básicas del mapa
@@ -36,13 +54,40 @@ require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "as
         center: new google.maps.LatLng @center.lat, @center.lng
       # Se crea el mapa y se agrega al dic creado anteriormente
       @map = new google.maps.Map document.getElementById(@map_id), map_options
+      @bounds = new google.maps.LatLngBounds()
+      if opts.yourPositionMarker == true
+        @setCenterMarker(new google.maps.LatLng(@center.lat, @center.lng), opts.centerPin)
+      if opts.url
+        @fetchMarkers(opts.url, opts.pinsImage)
 
-    setCenterMarker: (map, position)->
-    # Patch testing
-    # TODO: Crear método para manejo de pin de tu ubicación
+    setCenterMarker: (position, pinImage)->
+      @centerMarker = new google.maps.Marker
+        position: position
+        map: @map
+        icon: pinImage
+        title: "Mi posición"
+      @bounds.extend @centerMarker.getPosition()
+      # TODO: Agregar imagenes de Pin
 
-    fetchMarkers: (map, url)->
-    # TODO: Método para obtener los marcadores de algún servicio
+    fetchMarkers: (url, pinsImage = null)->
+      # TODO: Cambiar las imagenes de los Pins
+      list = new MarkerList({
+        url: url
+      })
+      self = @
+      list.fetch
+        success: ->
+
+          list.forEach (m, i)->
+            self.markers[m.get 'id'] = new google.maps.Marker
+              position: new google.maps.LatLng m.get('lat'), m.get('lng')
+              map: self.map
+              title: "H",
+              icon: pinsImage
+            self.bounds.extend self.markers[m.get 'id'].getPosition()
+          self.map.fitBounds(self.bounds)
+
+
 
 
     # Obtiene ubicación mediante la biblioteca geoposition.js y la guarda en cookies y en la instancia de la aplicación
@@ -75,4 +120,5 @@ require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "as
         console.log "Denied by user."
 
   # Inicia la aplicación
-  window.map_view = new MapView()
+  window.MapView = MapView
+  load_app()

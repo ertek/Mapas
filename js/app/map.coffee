@@ -108,24 +108,27 @@ require [
               map: self.map
               title: "H",
               icon: pinsImage
-            template = Handlebars.compile(self.opts.popupTemplate)
-            contentString = template({m:m})
-            console.log m
-            google.maps.event.addListener self.markers[m.get 'id'], 'click', ->
-              if infowindow
-                infowindow.close()
-              #markers[business.get 'id'].setIcon regularBigPin
-              #infowindow = new google.maps.InfoWindow
-              #	content: contentString
 
-              infowindow = new google.maps.InfoWindow
-                content: contentString
-                disableAutoPan: false
+            if self.opts.popupTemplate
+              template = Handlebars.compile(self.opts.popupTemplate)
+              contentString = template({m:m})
+              console.log m
+
+              google.maps.event.addListener self.markers[m.get 'id'], 'click', ->
+                if infowindow
+                  infowindow.close()
+                #markers[business.get 'id'].setIcon regularBigPin
+                #infowindow = new google.maps.InfoWindow
+                #	content: contentString
+
+                infowindow = new google.maps.InfoWindow
+                  content: contentString
+                  disableAutoPan: false
 
 
-              infowindow.open self.map, self.markers[m.get 'id']
-              last_model = m
-              return
+                infowindow.open self.map, self.markers[m.get 'id']
+                last_model = m
+                return
 
             self.bounds.extend self.markers[m.get 'id'].getPosition()
           self.map.fitBounds(self.bounds)

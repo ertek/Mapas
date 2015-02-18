@@ -42,6 +42,15 @@ require [
     bounds: null
     opts: {}
 
+
+    storedPosition: ->
+      lat = $.cookie 'lat'
+      lng = $.cookie 'lng'
+      if lat and lng
+        return {lat, lng}
+      else
+        return false
+
     # Método de inicialización, agrega opciones a la aplicación
     initialize: (opts)->
       if opts
@@ -55,10 +64,11 @@ require [
 
       if @storedPosition()
         @center = @storedPosition()
+        if $(@el).length
+          @render(opts)
       else
         @getBrowserGeolocation()
-      if $(@el).length
-        @render(opts)
+
 
     # Renderiza html y mapa
     render: (opts)->
@@ -128,21 +138,18 @@ require [
         console.log "Error al localizar"
 
     # Obtiene ubicación guardada en las cookies
-    storedPosition: ->
-      lat = $.cookie 'lat'
-      lng = $.cookie 'lng'
-      if lat and lng
-        return {lat, lng}
-      else
-        return false
+
 
     # Guarda la ubicación en las cookies
     storePosition: (position)->
       # TODO: Guardar la info de forma segura
       $.cookie 'lat', position.coords.latitude
       $.cookie 'lng', position.coords.longitude
-      @center = @storedPosition()
-      return
+      console.log @
+      window.map_view.center =
+        'lat': position.coords.latitude,
+        'lng': position.coords.longitude
+      window.map_view.render(window.map_view.opts)
 
     # Método de error para geoubicación
     geolocationErrorCallback: (err)->

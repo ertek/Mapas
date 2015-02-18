@@ -1,5 +1,19 @@
 # Creado por Jorge Cedi Voirol el 13 de Febrero del 2015
-require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "async!http://maps.google.com/maps/api/js?sensor=false'"],  (MapModule) ->
+# Opciones
+# width
+# height
+# url
+# yourPositionMarker
+# pinsImage
+# centerPin
+require [
+  "handlebars",
+  "jquery",
+  "jquery-cookie",
+  "underscore",
+  "backbone",
+  "geoPosition",
+  "async!http://maps.google.com/maps/api/js?sensor=false&v=3"],  (Handlebars) ->
 
   class MarkerModel extends  Backbone.Model
     initialize: ->
@@ -26,10 +40,12 @@ require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "as
     markers: []
     centerMarker: null
     bounds: null
+    opts: {}
 
     # Método de inicialización, agrega opciones a la aplicación
     initialize: (opts)->
       if opts
+        @opts = opts
         if opts.width
           @width = opts.width
         if opts.height
@@ -67,28 +83,42 @@ require ["jquery", "jquery-cookie", "underscore", "backbone", "geoPosition", "as
         icon: pinImage
         title: "Mi posición"
       @bounds.extend @centerMarker.getPosition()
-      # TODO: Agregar imagenes de Pin
 
     fetchMarkers: (url, pinsImage = null)->
-      # TODO: Cambiar las imagenes de los Pins
       list = new MarkerList({
         url: url
       })
       self = @
       list.fetch
         success: ->
-
+          infowindow = null
           list.forEach (m, i)->
             self.markers[m.get 'id'] = new google.maps.Marker
               position: new google.maps.LatLng m.get('lat'), m.get('lng')
               map: self.map
               title: "H",
               icon: pinsImage
+            template = Handlebars.compile(self.opts.popupTemplate)
+            contentString = template({m:m})
+            console.log m
+            google.maps.event.addListener self.markers[m.get 'id'], 'click', ->
+              if infowindow
+                infowindow.close()
+              #markers[business.get 'id'].setIcon regularBigPin
+              #infowindow = new google.maps.InfoWindow
+              #	content: contentString
+
+              infowindow = new google.maps.InfoWindow
+                content: contentString
+                disableAutoPan: false
+
+
+              infowindow.open self.map, self.markers[m.get 'id']
+              last_model = m
+              return
+
             self.bounds.extend self.markers[m.get 'id'].getPosition()
           self.map.fitBounds(self.bounds)
-
-
-
 
     # Obtiene ubicación mediante la biblioteca geoposition.js y la guarda en cookies y en la instancia de la aplicación
     getBrowserGeolocation: ->

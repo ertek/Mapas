@@ -42,6 +42,15 @@ require [
     bounds: null
     opts: {}
 
+
+    storedPosition: ->
+      lat = $.cookie 'lat'
+      lng = $.cookie 'lng'
+      if lat and lng
+        return {lat, lng}
+      else
+        return false
+
     # Método de inicialización, agrega opciones a la aplicación
     initialize: (opts)->
       if opts
@@ -55,10 +64,11 @@ require [
 
       if @storedPosition()
         @center = @storedPosition()
+        if $(@el).length
+          @render(opts)
       else
         @getBrowserGeolocation()
-      if $(@el).length
-        @render(opts)
+
 
     # Renderiza html y mapa
     render: (opts)->
@@ -98,24 +108,27 @@ require [
               map: self.map
               title: "H",
               icon: pinsImage
-            template = Handlebars.compile(self.opts.popupTemplate)
-            contentString = template({m:m})
-            console.log m
-            google.maps.event.addListener self.markers[m.get 'id'], 'click', ->
-              if infowindow
-                infowindow.close()
-              #markers[business.get 'id'].setIcon regularBigPin
-              #infowindow = new google.maps.InfoWindow
-              #	content: contentString
 
-              infowindow = new google.maps.InfoWindow
-                content: contentString
-                disableAutoPan: false
+            if self.opts.popupTemplate
+              template = Handlebars.compile(self.opts.popupTemplate)
+              contentString = template({m:m})
+              console.log m
+
+              google.maps.event.addListener self.markers[m.get 'id'], 'click', ->
+                if infowindow
+                  infowindow.close()
+                #markers[business.get 'id'].setIcon regularBigPin
+                #infowindow = new google.maps.InfoWindow
+                #	content: contentString
+
+                infowindow = new google.maps.InfoWindow
+                  content: contentString
+                  disableAutoPan: false
 
 
-              infowindow.open self.map, self.markers[m.get 'id']
-              last_model = m
-              return
+                infowindow.open self.map, self.markers[m.get 'id']
+                last_model = m
+                return
 
             self.bounds.extend self.markers[m.get 'id'].getPosition()
           self.map.fitBounds(self.bounds)
@@ -128,21 +141,18 @@ require [
         console.log "Error al localizar"
 
     # Obtiene ubicación guardada en las cookies
-    storedPosition: ->
-      lat = $.cookie 'lat'
-      lng = $.cookie 'lng'
-      if lat and lng
-        return {lat, lng}
-      else
-        return false
+
 
     # Guarda la ubicación en las cookies
     storePosition: (position)->
       # TODO: Guardar la info de forma segura
       $.cookie 'lat', position.coords.latitude
       $.cookie 'lng', position.coords.longitude
-      @center = @storedPosition()
-      return
+      console.log @
+      window.map_view.center =
+        'lat': position.coords.latitude,
+        'lng': position.coords.longitude
+      window.map_view.render(window.map_view.opts)
 
     # Método de error para geoubicación
     geolocationErrorCallback: (err)->

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Mapa</title>
     <style>
-        #map1{
+        #map{
             height: 500px;
             width: 500px;
         }
@@ -13,16 +13,17 @@
 </head>
 <body>
     <div id="map"></div>
+    <script id="template">
+        El lugar con id <b>{{ m.attributes.id }}</b><br/> está en la posición<br/> <i>{{ m.attributes.lat }},{{ m.attributes.lng }}</i>
+    </script>
     <script>
         window.load_app = function(){
-            map_view = new MapView({
-                height: '500px',
-                width: '500px',
+            window.map_view = new MapView({
                 url: '/data.json/',
                 yourPositionMarker: true,
-                pinsImage: '/img/portfolio.png',
-                centerPin: '/img/center.png',
-                popupTemplate: "El negocio con id <b>{{ m.attributes.id }}</b><br/> está en la posición <i>{{ m.attributes.lat }},{{ m.attributes.lng }}</i>"
+                pinsImage: '/img/pin.png',
+                //centerPin: '/img/pin.png',
+                popupTemplate: $("#template").html()
             });
         }
     </script>
